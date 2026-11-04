@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인천항시설관리센터 스마트 공공문서 작성의 이해와 실제</title>
+<style>
+  :root {
+    --primary: #0a2540;
+    --primary-light: #1e3a8a;
+    --accent: #008080;
+    --accent-light: #e6f4f1;
+    --bg: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-sub: #475569;
+    --border: #e2e8f0;
+    --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    background-color: var(--bg);
+    color: var(--text-main);
+    line-height: 1.65;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  /* Top Bar */
+  header {
+    background: var(--primary);
+    color: #fff;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .badge {
+    background: var(--accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+  .course-title {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  .page-indicator {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #cbd5e1;
+  }
+  .page-indicator .current {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  /* Progress Bar */
+  .progress-container {
+    width: 100%;
+    height: 4px;
+    background: rgba(255,255,255,0.2);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+  }
+  .progress-bar {
+    height: 100%;
+    background: #38bdf8;
+    width: 6.25%;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Main Container */
+  main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 20px 80px;
+    max-width: 1000px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .slide-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 48px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    min-height: 520px;
+    display: flex;
+    flex-direction: column;
+    animation: fadeIn 0.25s ease-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .slide-header {
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 20px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .slide-page-badge {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 3px 10px;
+    border-radius: 6px;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+  .slide-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1.35;
+    letter-spacing: -0.5px;
+  }
+  .slide-body {
+    flex: 1;
+    font-size: 16px;
+    line-height: 1.75;
+  }
+
+  /* Lists & Content Elements */
+  ol.content-list {
+    list-style: none;
+    counter-reset: custom-counter;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  li.main-item {
+    position: relative;
+    padding-left: 36px;
+  }
+  li.main-item::before {
+    counter-increment: custom-counter;
+    content: counter(custom-counter);
+    position: absolute;
+    left: 0;
+    top: 2px;
+    width: 24px;
+    height: 24px;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .item-text {
+    font-weight: 600;
+    color: #0f172a;
+    display: block;
+    margin-bottom: 6px;
+  }
+  ul.sub-list {
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  li.sub-item {
+    color: var(--text-sub);
+    position: relative;
+    padding-left: 18px;
+    font-size: 15px;
+  }
+  li.sub-item::before {
+    content: '·';
+    position: absolute;
+    left: 6px;
+    font-weight: bold;
+    color: var(--accent);
+  }
+  .info-box {
+    background: #f1f5f9;
+    border-left: 4px solid var(--accent);
+    padding: 14px 18px;
+    border-radius: 0 10px 10px 0;
+    margin: 14px 0;
+    font-size: 15px;
+    color: var(--text-sub);
+  }
+
+  /* Bottom Controls */
+  footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #fff;
+    border-top: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+  }
+  .nav-btn {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover:not(:disabled) {
+    background: var(--primary-light);
+    transform: translateY(-1px);
+  }
+  .nav-btn:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .center-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .toc-btn {
+    background: #f1f5f9;
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .toc-btn:hover {
+    background: #e2e8f0;
+  }
+  .key-hint {
+    font-size: 12px;
+    color: #94a3b8;
+  }
+
+  /* Table of Contents Modal */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-content {
+    background: #fff;
+    border-radius: 20px;
+    max-width: 650px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 28px 32px;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 14px;
+  }
+  .modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #94a3b8;
+    cursor: pointer;
+  }
+  .toc-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .toc-item {
+    padding: 12px 16px;
+    border-radius: 8px;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .toc-item:hover {
+    background: var(--accent-light);
+    border-color: var(--accent);
+  }
+  .toc-item.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+  .toc-num {
+    font-weight: 700;
+    font-size: 13px;
+    padding: 2px 8px;
+    background: rgba(0,0,0,0.06);
+    border-radius: 4px;
+  }
+  .toc-item.active .toc-num {
+    background: rgba(255,255,255,0.2);
+  }
+
+  @media (max-width: 768px) {
+    .slide-card { padding: 24px 20px; min-height: 480px; }
+    .slide-title { font-size: 20px; }
+    .course-title { font-size: 14px; }
+    .key-hint { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="badge">웹교재</span>
+    <span class="course-title">인천항시설관리센터 스마트 공공문서 작성의 이해와 실제</span>
+  </div>
+  <div class="page-indicator">
+    <span class="current" id="curPage">01</span>
+    <span>/</span>
+    <span id="totalPage">16</span>
+  </div>
+  <div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+</header>
+
+<main>
+  <div class="slide-card" id="slideCard">
+    <div class="slide-header">
+      <div>
+        <span class="slide-page-badge" id="slideBadge">PAGE 01</span>
+        <h2 class="slide-title" id="slideTitle">표지 및 과정 안내</h2>
+      </div>
+    </div>
+    <div class="slide-body" id="slideBody">
+      <!-- Injected by JavaScript -->
+    </div>
+  </div>
+</main>
+
+<footer>
+  <button class="nav-btn" id="prevBtn" onclick="changePage(-1)">◀ 이전 장</button>
+  <div class="center-controls">
+    <button class="toc-btn" onclick="openToc()">목차 열기</button>
+    <span class="key-hint">방향키(←, →)로 이동 가능</span>
+  </div>
+  <button class="nav-btn" id="nextBtn" onclick="changePage(1)">다음 장 ▶</button>
+</footer>
+
+<!-- Table of Contents Modal -->
+<div class="modal-backdrop" id="tocModal" onclick="closeToc(event)">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="modal-title">전체 목차 (총 16장)</h3>
+      <button class="close-btn" onclick="closeToc()">×</button>
+    </div>
+    <div class="toc-grid" id="tocGrid">
+      <!-- Generated by JavaScript -->
+    </div>
+  </div>
+</div>
+
+<script>
+  const pages = [{"num": "01", "title": "표지 및 과정 안내 · 스마트한 공공문서 작성의 이해와 실제", "html": "<ol class=\"content-list\"><li class=\"main-item\"><span class=\"item-text\">과정명: 스마트한 공공문서 작성의 이해와 실제</span></li><li class=\"main-item\"><span class=\"item-text\">대상: 인천항시설관리센터 관리자 및 실무 담당자</span></li><li class=\"main-item\"><span class=\"item-text\">교육 목표</span><ul class=\"sub-list\"><li class=\"sub-item\">공문서 작성의 본질적 관점을 &#x27;기안자 중심&#x27;에서 &#x27;결재권자 및 독자 중심&#x27;으로 전환합니다.</li><li class=\"sub-item\">WHO-WHY-WHAT-HOW-IF 5단계 프로세스를 통해 논리적이고 설득력 있는 문서를 구조화합니다.</li><li class=\"sub-item\">행정안전부 행정업무운영 편람에 근거한 표준 서식, 항목 구분, 수치 표기 규범을 완벽히 습득합니다.</li><li class=\"sub-item\">어려운 행정 용어를 쉬운 공공언어로 순화하고, 생성형 AI(제미나이 등)를 실무 비서로 활용하는 역량을 갖춥니다.</li></ul></li><li class=\"main-item\"><span class=\"item-text\">교재 활용법: 하단의 이전·다음 단추 또는 키보드 방향키(←, →)를 눌러 페이지를 넘기며 학습하십시오.</span></li></ol>"}, {"num": "02", "title": "공문서의 개념과 성립 · 효력 요건", "html": "<ol class=\"content-list\"><li class=\"main-item\"><span class=\"item-text\">공문서의 정의: 행정기관 또는 공공법인에서 공무상 작성하거나 시행하는 문서 및 행정기관이 접수한 모든 문서를 의미합니다.</span></li><li class=\"main-item\"><span class=\"item-text\">성립 시점: 결재권자의 결재(전자서명 포함)가 완료됨으로써 성립합니다.</span></li><li class=\"main-item\"><span class=\"item-text\">효력 발생 시점: 수신자에게 도달(전자문서시스템의 경우 수신자의 전자문서시스템에 입력된 때)함으로써 효력이 발생합니다 (도달주의 원칙).</span></li><li class=\"main-item\"><span class=\"item-text\">공공기관 공문서가 갖추어야 할 3대 품질 기준</span><ul class=\"sub-list\"><li class=\"sub-item\">신뢰성: 관계 법령, 행정 편람 및 객관적 사실에 근거하여 작성되어야 합니다.</li><li class=\"sub-item\">명확성: 오해의 소지가 없는 정확한 용어와 구체적인 수치(일정, 예산, 물량)를 사용해야 합니다.</li><li class=\"sub-item\">신속성: 두괄식 구성을 통해 결재권자가 핵심 내용을 즉시 파악하고 신속히 의사결정할 수 있어야 합니다.</li></ul></li></ol>"}, {"num": "03", "title": "보고서 작성의 5 STEP PROCESS", "html": "<ol class=\"content-list\"><li class=\"main-item\"><span class=\"item-text\">5단계 프로세스 개요 (The 4MAT 기반 프레임워크)</span><ul class=\"sub-list\"><li class=\"sub-item\">신뢰와 설득을 이끌어 내고 문서의 구조화를 돕는 질문 기반 작성 프로세스입니다.</li></ul></li><li class=\"main-item\"><span class=\"item-text\">5 STEP 프레임워크</span><ul class=\"sub-list\"><li class=\"sub-item\">1단계 WHO (관점과 독자): 이슈의 설정과 결재권자 관점 파악</li><li class=\"sub-item\">2단계 WHY (핵심 문제 정의): 추진 배경과 극복해야 할 본질적 문제(GAP) 도출</li><li class=\"sub-item\">3단계 WHAT (목표 수립): 보고서가 달성하고자 하는 구체적 핵심 과업 및 제안</li><li class=\"sub-item\">4단계 HOW (구조화 및 추진방안): 일정, 조직, 예산, 단계별 실행 계획 수립</li><li class=\"sub-item\">5단계 IF (실행 및 성과): 예상 정량·정성적 성과 및 잠재 리스크 대응책</li></ul></li></ol>"}, {"num": "04", "title": "[STEP 1", "html": "<ol class=\"content-list\"><li class=\"main-item\"><span class=\"item-text\">독자의 머릿속 질문 vs 작성자의 보고서 내용</span><ul class=\"sub-list\"><li class=\"sub-item\">독자가 묻는 것: &quot;왜 내가 이걸 지금 봐야 하지? 우리 부서, 우리 기관에 어떤 영향이 있는가?&quot;</li><li class=\"sub-item\">작성자가 담을 것: 독자의 관심사와 의사결정 기준에 맞춘 핵심 가치 제시</li></ul></li><li class=\"main-item\"><span class=\"item-text\">결재권자 성향별 맞춤 전략</span><ul class=\"sub-list\"><li class=\"sub-item\">직관형 결재권자: 결론과 기대효과를 첫 머리에 두괄식으로 간결하게 제시</li><li class=\"sub-item\">분석형 결재권자: 정량적 통계, 근거 데이터, 타 기관 비교 자료를 구체적으로 첨부</li><li class=\"sub-item\">실무형 결재권자: 세부 실행 절차, 담당 인력, 일정표의 현실성 검증에 집중</li></ul></li><li class=\"main-item\"><span class=\"item-text\">작성 전 30초 체크포인트: &quot;이 문서를 최종 승인할 사람은 누구이며, 그가 가장 궁금해할 숫자는 무엇인가?&quot;</span></li></ol>"}, {"num": "05", "title": "[STEP 2", "html": "<ol class=\"content-list\"><li class=\"main-item\"><span class=\"item-text\">문제의 본질 = 격차(GAP)</span><ul class=\"sub-list\"><li class=\"sub-item\">바람직한 모습(To-be)과 현재의 모습(As-is) 사이에 생기는 차이를 인식할 때 비로소 문제가 발생합니다.</li></ul></li><li class=\"main-item\"><span class=\"item-text\">인천항시설관리센터 현장 적용 예시</span><ul class=\"sub-list\"><li class=\"sub-item\">바람직한 모습(To-be): 항만 터미널 소방·기계설비 무사고 가동률 100% 유지 및 고객 안전 확보</li><li class=\"sub-item\">현재의 모습(As-is): 동절기 한파로 인한 배관 동파 우려 및 일부 노후 밸브 누수 위험 감지</li><li class=\"sub-item\">핵심 문제(GAP): 선제적 긴급 정밀점검 및 노후 부품 교체 지연 시 터미널 운영 차질 우려</li></ul></li><li class=\"main-item\"><span class=\"item-text\">추진 배경 작성 요령: 현상의 단순 나열이 아닌, &#x27;지금 즉시 조치하지 않으면 발생하는 손실&#x27;을 수치로 명시합니다.</span></li></ol>"}, {"num": "06", "title": "[STEP 3", "html": "<ol class=\"content-list\"><li class=\"main-item\"><span class=\"item-text\">목표 수립의 SMART 원칙</span><ul class=\"sub-list\"><li class=\"sub-item\">구체적(Specific), 측정 가능(Measurable), 달성 가능(Achievable), 관련성(Relevant), 시한 명시(Time-bound)</li></ul></li><li class=\"main-item\"><span class=\"item-text\">단 한 문장으로 끝내는 핵심 제안(Core Message)</span><ul class=\"sub-list\"><li class=\"sub-item\">&quot;동절기 한파 대비 여객터미널 핵심 설비 합동 점검 및 노후 밸브 12개소 즉각 교체 추진&quot;</li></ul></li><li class=\"main-item\"><span class=\"item-text\">핵심 과업 도출 시 주의사항</span><ul class=\"sub-list\"><li class=\"sub-item\">여러 가지 요구사항을 두서없이 섞지 않고, 핵심 과업 1~2개를 명확한 우선순위로 정리합니다.</li><li class=\"sub-item\">제목만 읽어도 문서 전체의 목적이 한눈에 파악되도록 작성합니다.</li></ul></li></ol>"}, {"num": "07", "title": "[STEP 4", "html": "<ol class=\"content-list\"><li class=\"main-item\"><span class=\"item-text\">논리적 실행 계획의 4대 요소</span><ul class=\"sub-list\"><li class=\"sub-item\">추진 기간 및 일정: 착수부터 검수까지의 마일스톤 제시</li><li class=\"sub-item\">투입 조직 및 역할: 내부 전담 인력 및 외부 전문업체 협력 체계</li><li class=\"sub-item\">소요 예산 및 재원: 산출 내역(단가 x 수량)이 투명한 예산 계획</li><li class=\"sub-item\">세부 추진 절차: 사전 준비 - 현장 실행 - 결과 보고 - 사후 관리 4단계 프로세스</li></ul></li><li class=\"main-item\"><span class=\"item-text\">개조식 구조화의 기술</span><ul class=\"sub-list\"><li class=\"sub-item\">큰 항목에서 세부 항목으로 단계적 들여쓰기 적용</li><li class=\"sub-item\">명사형 종결어미 사용(추진함, 완료 예정, 조치 완료)을 통해 간결하고 명확한 어조 유지</li></ul></li></ol>"}, {"num": "08", "title": "[STEP 5", "html": "<ol class=\"content-list\"><li class=\"main-item\"><span class=\"item-text\">기대효과 제시법</span><ul class=\"sub-list\"><li class=\"sub-item\">정량적 기대효과: 설비 장애 발생률 0% 달성, 긴급 보수 비용 연간 2,500만 원 절감</li><li class=\"sub-item\">정성적 기대효과: 터미널 이용객 편의 증대, 인천항 시설 안전 대외 공신력 제고</li></ul></li><li class=\"main-item\"><span class=\"item-text\">잠재적 리스크 및 비상 대응 계획(Contingency Plan)</span><ul class=\"sub-list\"><li class=\"sub-item\">발생 가능한 돌발 변수: 부품 수급 지연, 기상 악화로 인한 현장 작업 중단</li><li class=\"sub-item\">사전 대응책: 대체 공급사 사전 확보, 비상 대기조 24시간 편성 운영</li></ul></li><li class=\"main-item\"><span class=\"item-text\">결재권자의 마지막 안도감: &quot;만약의 문제 상황까지 완벽히 대비되어 있구나&quot;라는 신뢰 확보</span></li></ol>"}, {"num": "09", "title": "공문서 표준 규격과 3단 구조", "html": "<ol class=\"content-list\"><li class=\"main-item\"><span class=\"item-text\">두문(머리글)</span><ul class=\"sub-list\"><li class=\"sub-item\">행정기관명: 발신 기관의 공식 명칭 (예: 사단법인 인천항시설관리센터)</li><li class=\"sub-item\">수신자: 수신 기관의 장 직명 (예: 인천항만공사 사장), 수신자가 둘 이상일 때는 &#x27;수신자 참조&#x27; 기재</li></ul></li><li class=\"main-item\"><span class=\"item-text\">본문(알맹이)</span><ul class=\"sub-list\"><li class=\"sub-item\">제목: 문서의 내용을 한눈에 알 수 있도록 간결하고 명확하게 기재</li><li class=\"sub-item\">본문 내용: 기안의 근거 및 이유, 주요 사실 및 요청 사항을 체계적으로 서술</li><li class=\"sub-item\">붙임: 본문에 첨부할 서류가 있는 경우 서류명과 부수를 명확히 기재</li></ul></li><li class=\"main-item\"><span class=\"item-text\">결문(맺음글)</span><ul class=\"sub-list\"><li class=\"sub-item\">발신명의: 문서 발신자의 직명 (기관장 명의, 직인 날인 또는 전자서명)</li><li class=\"sub-item\">기안자·검토자·결재자 직위 및 성명, 생산등록번호 및 시행일자, 우편번호, 주소, 전화번호 등 연락처 기재</li></ul></li></ol>"}, {"num": "10", "title": "본문 체계화를 위한 8단계 항목 부호 표기법", "html": "<ol class=\"content-list\"><li class=\"main-item\"><span class=\"item-text\">법정 8단계 항목 구분 순서</span><ul class=\"sub-list\"><li class=\"sub-item\">1째 항목: 1., 2., 3. (숫자 뒤 온점, 첫 칸 시작)</li><li class=\"sub-item\">2째 항목: 가., 나., 다. (2타 들여쓰기)</li><li class=\"sub-item\">3째 항목: 1), 2), 3) (반괄호 숫자, 4타 들여쓰기)</li><li class=\"sub-item\">4째 항목: 가), 나), 다) (반괄호 한글, 6타 들여쓰기)</li><li class=\"sub-item\">5째 항목: (1), (2), (3) (양괄호 숫자, 8타 들여쓰기)</li><li class=\"sub-item\">6째 항목: (가), (나), (다) (양괄호 한글, 10타 들여쓰기)</li><li class=\"sub-item\">7째 항목: ①, ②, ③ (원문자 숫자, 12타 들여쓰기)</li><li class=\"sub-item\">8째 항목: ㉮, ㉯, ㉰ (원문자 한글, 14타 들여쓰기)</li></ul></li><li class=\"main-item\"><span class=\"item-text\">핵심 표기 원칙</span><ul class=\"sub-list\"><li class=\"sub-item\">하나의 항목만 있을 때는 항목 부호를 부여하지 않습니다.</li><li class=\"sub-item\">부호 뒤에는 반드시 한 칸(공백 1타)을 띄우고 글을 시작합니다.</li></ul></li></ol>"}, {"num": "11", "title": "날짜 · 시간 · 숫자 · 금액 표기 6대 공식", "html": "<ol class=\"content-list\"><li class=\"main-item\"><span class=\"item-text\">날짜 표기: 온점(.)으로 년·월·일을 대신하며, 마지막 일자 뒤에도 반드시 마침표를 찍습니다.</span><ul class=\"sub-list\"><li class=\"sub-item\">올바른 예: 2026. 11. 17. (온점 뒤 한 칸 띔)</li><li class=\"sub-item\">잘못된 예: 2026. 11. 17 (마지막 온점 누락), 2026/11/17, 2026-11-17</li></ul></li><li class=\"main-item\"><span class=\"item-text\">시간 표기: 24시간제 숫자로 시와 분 사이에 쌍점(:)을 찍습니다.</span><ul class=\"sub-list\"><li class=\"sub-item\">올바른 예: 14:00, 09:30</li><li class=\"sub-item\">잘못된 예: 오후 2시, 14시 00분</li></ul></li><li class=\"main-item\"><span class=\"item-text\">숫자 및 금액 표기: 아라비아 숫자를 쓰며 3자리마다 쉼표를 찍고, 금액은 괄호 안에 한글을 병기합니다.</span><ul class=\"sub-list\"><li class=\"sub-item\">올바른 예: 금15,000,000원(금일천오백만원)</li><li class=\"sub-item\">잘못된 예: 금 1,500만원, 금 15,000,000 원</li></ul></li><li class=\"main-item\"><span class=\"item-text\">기간 및 일시 부호: 물결표(~)를 사용하며 앞뒤로 한 칸씩 띄웁니다.</span><ul class=\"sub-list\"><li class=\"sub-item\">올바른 예: 2026. 11. 17. ~ 11. 20.</li></ul></li></ol>"}, {"num": "12", "title": "본문 마침의 정석 · '끝' 표시와 '붙임' 작성법", "html": "<ol class=\"content-list\"><li class=\"main-item\"><span class=\"item-text\">본문 내용만 있는 경우</span><ul class=\"sub-list\"><li class=\"sub-item\">본문 마지막 글자에서 두 칸(공백 2타) 띄우고 &#x27;끝.&#x27;을 기재합니다.</li><li class=\"sub-item\">예시: … 통보합니다.  끝.</li></ul></li><li class=\"main-item\"><span class=\"item-text\">붙임 서류가 있는 경우</span><ul class=\"sub-list\"><li class=\"sub-item\">본문 아래 한 줄을 띄우고 좌측 첫 칸에 &#x27;붙임&#x27;을 씁니다.</li><li class=\"sub-item\">붙임 서류명을 쓰고 마지막 글자에서 두 칸 띄우고 &#x27;끝.&#x27;을 기재합니다.</li><li class=\"sub-item\">예시:</li></ul></li></ol>\n<div class=\"info-box\"><p>붙임  1. 안전점검 계획서 1부.</p></div>\n<ol class=\"content-list\"><li class=\"main-item\"><span class=\"item-text\">점검 대상 설비 목록 1부.  끝.</span></li><li class=\"main-item\"><span class=\"item-text\">표로 끝나는 경우</span><ul class=\"sub-list\"><li class=\"sub-item\">표의 마지막 내용 글자 뒤 두 칸 띄우고 &#x27;끝.&#x27;을 표기합니다.</li><li class=\"sub-item\">표에 빈칸이 남아 있으면 빈칸에 &#x27;이하 빈칸&#x27;을 쓰고 표 아래 좌측에 &#x27;끝.&#x27;을 표기합니다.</li></ul></li></ol>"}, {"num": "13", "title": "알기 쉬운 공공언어 바로 쓰기", "html": "<ol class=\"content-list\"><li class=\"main-item\"><span class=\"item-text\">국립국어원 쉬운 공문서 길잡이 핵심 원칙</span><ul class=\"sub-list\"><li class=\"sub-item\">낡은 한자어, 권위적 행정용어, 일본어투 외래어를 일상적인 우리말로 순화합니다.</li></ul></li><li class=\"main-item\"><span class=\"item-text\">주요 행정 용어 순화 대조</span><ul class=\"sub-list\"><li class=\"sub-item\">시달하다 → 알리다, 통보하다, 보내다</li><li class=\"sub-item\">징구하다 → 제출받다, 받아두다</li><li class=\"sub-item\">결손처분 → 손실처리</li><li class=\"sub-item\">감안하여 → 고려하여, 참작하여</li><li class=\"sub-item\">불입하다 → 납입하다, 내다</li><li class=\"sub-item\">절사하다 → 꺾어버리다, 버리다</li></ul></li><li class=\"main-item\"><span class=\"item-text\">시설관리 현장 용어 순화</span><ul class=\"sub-list\"><li class=\"sub-item\">금회 과업 → 이번 과업</li><li class=\"sub-item\">노후화로 인한 개보수 요망 → 시설이 낡아 수리 필요</li><li class=\"sub-item\">기 통보한 바와 같이 → 이미 알린 바와 같이</li></ul></li></ol>"}, {"num": "14", "title": "비문(非文) 없는 간결 · 명확한 문장 쓰기", "html": "<ol class=\"content-list\"><li class=\"main-item\"><span class=\"item-text\">주어와 서술어의 명확한 호응</span><ul class=\"sub-list\"><li class=\"sub-item\">잘못된 예: &quot;우리 센터의 목표는 항만 시설을 안전하게 관리하고 고객 만족을 증대하는 것이다.&quot; (목표와 서술어 어색)</li><li class=\"sub-item\">올바른 예: &quot;우리 센터는 항만 시설을 안전하게 관리하여 고객 만족도를 높이고자 합니다.&quot;</li></ul></li><li class=\"main-item\"><span class=\"item-text\">이중 피동 및 불필요한 번역투 지양</span><ul class=\"sub-list\"><li class=\"sub-item\">&#x27;생각되어집니다&#x27; → &#x27;생각합니다&#x27;</li><li class=\"sub-item\">&#x27;보여집니다&#x27; → &#x27;나타납니다&#x27;</li><li class=\"sub-item\">&#x27;~에 다름 아니다&#x27; → &#x27;~와 같다&#x27;</li></ul></li><li class=\"main-item\"><span class=\"item-text\">단문 위주의 명쾌한 문장 구성</span><ul class=\"sub-list\"><li class=\"sub-item\">3줄 이상 이어지는 복문을 피하고, 한 문장에는 하나의 사실만 담습니다.</li><li class=\"sub-item\">접속사(그리고, 그러나, 또한)의 남발을 줄이고 항목 번호로 명확히 분리합니다.</li></ul></li></ol>"}, {"num": "15", "title": "인천항시설관리센터 실전 기안문 클리닉", "html": "<ol class=\"content-list\"><li class=\"main-item\"><span class=\"item-text\">비포 기안문 (개선 전 줄글 형태)</span><ul class=\"sub-list\"><li class=\"sub-item\">&quot;인천항 여객터미널 내 소방시설 및 기계설비에 대한 정기 안전점검을 실시하고자 하오니 적극 협조하여 주시기 바라며, 점검 일정은 다음과 같고 점검 중 특이사항 발생 시 즉시 조치할 예정임.&quot;</li></ul></li><li class=\"main-item\"><span class=\"item-text\">애프터 기안문 (개선 후 표준 개조식 형태)</span></li><li class=\"main-item\"><span class=\"item-text\">추진 목적: 동절기 한파 대비 여객터미널 소방·기계설비 정밀 안전진단 실시</span></li><li class=\"main-item\"><span class=\"item-text\">점검 개요</span><ul class=\"sub-list\"><li class=\"sub-item\">가. 점검일시: 2026. 11. 24.(화) ~ 11. 25.(수) 09:00 ~ 18:00</li><li class=\"sub-item\">나. 대상시설: 인천항 연안·국제여객터미널 기계실 및 소방펌프실 전 구역</li><li class=\"sub-item\">다. 점검반: 시설관리팀장 외 4명 (전기·소방 전문인력 합동)</li></ul></li><li class=\"main-item\"><span class=\"item-text\">주요 점검내용: 소방 배관 누수 점검, 펌프 가동 상태, 기계 환기설비 점검</span></li><li class=\"main-item\"><span class=\"item-text\">협조사항: 점검 시간대 여객 안내방송 사전 송출 협조 요청.  끝.</span></li><li class=\"main-item\"><span class=\"item-text\">클리닉 핵심 포인트: 결재권자가 확인해야 할 핵심 항목(일시, 대상, 내용, 협조사항)이 5초 만에 식별됩니다.</span></li></ol>"}, {"num": "16", "title": "스마트 공문서 작성과 생성형 AI 프롬프트", "html": "<ol class=\"content-list\"><li class=\"main-item\"><span class=\"item-text\">생성형 AI(제미나이 등)를 활용한 공문서 작성 3단계</span><ul class=\"sub-list\"><li class=\"sub-item\">1단계 재료 준비: 현장 점검 메모, 회의록, 수치 데이터를 두서없이 수집</li><li class=\"sub-item\">2단계 프롬프트 실행: 명확한 역할, 맥락, 서식 규범을 지정하여 초안 자동 생성</li><li class=\"sub-item\">3단계 사실 검증: 작성자가 고유 명사, 숫자, 법적 적합성을 최종 검수·확정</li></ul></li><li class=\"main-item\"><span class=\"item-text\">공공문서 표준 생성 추천 프롬프트</span><ul class=\"sub-list\"><li class=\"sub-item\">&quot;너는 공공기관 행정문서 전문가야. 아래 제공하는 [현장 점검 메모]를 바탕으로 행정업무운영 편람에 부합하는 표준 기안문 양식으로 작성해줘. 1. 가. 1) 8단계 항목 체계를 준수하고, 날짜 표기 온점 규범과 &#x27;끝.&#x27; 표기를 엄격히 적용해줘. 문장은 간결한 개조식 명사형 종결어로 작성해줘.&quot;</li></ul></li><li class=\"main-item\"><span class=\"item-text\">필수 정보보안 수칙</span><ul class=\"sub-list\"><li class=\"sub-item\">기관 비공개 데이터, 개인정보, 보안 시설 위치 등 민감 정보는 AI에 절대 입력하지 않습니다.</li></ul></li></ol>"}];
+  let currentIndex = 0;
+
+  function renderPage(index) {
+    if (index < 0 || index >= pages.length) return;
+    currentIndex = index;
+    const p = pages[currentIndex];
+    
+    document.getElementById('curPage').innerText = String(currentIndex + 1).padStart(2, '0');
+    document.getElementById('totalPage').innerText = String(pages.length).padStart(2, '0');
+    document.getElementById('slideBadge').innerText = 'PAGE ' + String(currentIndex + 1).padStart(2, '0');
+    document.getElementById('slideTitle').innerText = p.title;
+    document.getElementById('slideBody').innerHTML = p.html;
+
+    const progress = ((currentIndex + 1) / pages.length) * 100;
+    document.getElementById('progressBar').style.width = progress + '%';
+
+    document.getElementById('prevBtn').disabled = (currentIndex === 0);
+    document.getElementById('nextBtn').disabled = (currentIndex === pages.length - 1);
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function changePage(delta) {
+    const nextIdx = currentIndex + delta;
+    if (nextIdx >= 0 && nextIdx < pages.length) {
+      renderPage(nextIdx);
+    }
+  }
+
+  function openToc() {
+    const grid = document.getElementById('tocGrid');
+    grid.innerHTML = '';
+    pages.forEach((p, idx) => {
+      const item = document.createElement('div');
+      item.className = 'toc-item' + (idx === currentIndex ? ' active' : '');
+      item.innerHTML = `<span class="toc-num">${String(idx + 1).padStart(2, '0')}</span> <span>${p.title}</span>`;
+      item.onclick = () => {
+        renderPage(idx);
+        closeToc();
+      };
+      grid.appendChild(item);
+    });
+    document.getElementById('tocModal').style.display = 'flex';
+  }
+
+  function closeToc(e) {
+    document.getElementById('tocModal').style.display = 'none';
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') {
+      changePage(-1);
+    } else if (e.key === 'ArrowRight' || e.key === ' ') {
+      if (document.getElementById('tocModal').style.display !== 'flex') {
+        changePage(1);
+      }
+    } else if (e.key === 'Escape') {
+      closeToc();
+    }
+  });
+
+  renderPage(0);
+</script>
+</body>
+</html>
